@@ -23,7 +23,7 @@ namespace Apriori {
                 List<string> key1 = keyValuePair.Key[1];
                 key0 = (from key in key0 select key.ToLower()).ToList();
                 key1 = (from key in key1 select key.ToLower()).ToList();
-                bool matchesSearch = (key0.Intersect(search).Count() >0 || key1.Intersect(search).Count() >0);
+                bool matchesSearch = (key0.Intersect(search).Count() > 0 || key1.Intersect(search).Count() > 0) || search.Length==0;
                 bool matchesUnsearch = (key0.Intersect(unsearch).Count() > 0 || key1.Intersect(unsearch).Count() > 0);
                 if ((matchesSearch && !matchesUnsearch) || args.Length==0) {
                     if (key0.Count==1 && key1.Count==1)
