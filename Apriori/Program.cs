@@ -15,30 +15,24 @@ namespace Apriori {
             Dictionary<string, List<string>> data = (Dictionary<string, List<string>>) deserialise("storyTagData.dat");
             Apriori apriori = new Apriori(data);
             List<List<string>> frequentSets = apriori.getFrequentSets();
-            string search = args.Length>0 ? args[0].ToLower() : "";
+            string[] search = (from arg in args where arg.Substring(0, 1) != "-" select arg.ToLower()).ToArray();
+            string[] unsearch = (from arg in args where arg.Substring(0, 1) == "-" select arg.Substring(1).ToLower()).ToArray();
             Dictionary<List<string>[], double> strongRules = apriori.generateStrongRules(frequentSets);
             foreach (KeyValuePair<List<string>[], double> keyValuePair in strongRules) {
                 List<string> key0 = keyValuePair.Key[0];
                 List<string> key1 = keyValuePair.Key[1];
-                key0.ForEach(item => item.ToLower());
-                key1.ForEach(item => item.ToLower());
-                if (key0.Contains(search) || key1.Contains(search) || search=="") {
+                key0 = (from key in key0 select key.ToLower()).ToList();
+                key1 = (from key in key1 select key.ToLower()).ToList();
+                bool matchesSearch = (key0.Intersect(search).Count() >0 || key1.Intersect(search).Count() >0);
+                bool matchesUnsearch = (key0.Intersect(unsearch).Count() > 0 || key1.Intersect(unsearch).Count() > 0);
+                if ((matchesSearch && !matchesUnsearch) || args.Length==0) {
+                    if (key0.Count==1 && key1.Count==1)
                     Console.WriteLine(String.Format(
-                        @"Things tagged ""{0}"" are also tagged ""{1}"", {2}% of the time!",
+                        @"{0},{1},{2}",
                         String.Join(" ", keyValuePair.Key[0]), String.Join(" ", keyValuePair.Key[1]),
-                        Math.Round(keyValuePair.Value * 100, 2)));
+                        Math.Round(keyValuePair.Value * 100, 6)));
                 }
             }
-
-
-
-            /*
-            StreamWriter writer = new StreamWriter(newPath);
-            foreach (List<string> allCombination in apriori.getFrequentSets()) {
-                writer.WriteLine(String.Join(", ", allCombination));
-            }
-            writer.Close();
-            Process.Start("notepad", newPath);*/
         }
 
         private static object deserialise(string filepath) {
